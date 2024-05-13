@@ -1,20 +1,23 @@
 # resource <resource-type> <resource-name>
-resource "aws_instance" "db" {
-
-    ami = "ami-090252cbe067a9e58"
+resource "aws_instance" "expense" {
+       count = length(var.instance_names)
+     ami = var.image_id
+    
     vpc_security_group_ids = [aws_security_group.allow_ssh.id]
-    instance_type = "t3.micro"
-
-    tags = {
-        Name = "db"
-    }
+    instance_type = var.instance_names[count.index] == "db" ? "t3.small" : "t3.micro"
+    tags = merge(
+          var.common_tags,
+          { 
+            Name = var.instance_names[count.index]
+            Module = var.instance_names[count.index]
+          }
+    )
 }
 
 resource "aws_security_group" "allow_ssh" {
     name = "allow_ssh"
     description = "allowing SSH access"
 
-    #terraform block
     ingress {
         from_port        = 22
         to_port          = 22
@@ -31,6 +34,6 @@ resource "aws_security_group" "allow_ssh" {
 
     tags = {
         Name = "allow_ssh"
-        CreatedBy = "Sivakumar"
+        CreatedBy = "Sailu"
     }
 }
